@@ -6,10 +6,15 @@ import { UserRepository } from "../repositories/UserRepository";
 import { SignUpUseCase } from "../use_cases/user/SignUp";
 import { LoginUseCase } from "../use_cases/user/Login";
 import { signUpValidator, loginValidator } from "../validators/userValidators";
+import { OtpVerify } from "../use_cases/user/OtpVerify";
+import { authenticateUser } from "../middlewares/authenticate";
+import { EditUserDetailsUseCase } from "../use_cases/user/EditUserDetails";
 
 const userController = new UserController(
   new SignUpUseCase(new UserRepository()),
-  new LoginUseCase(new UserRepository())
+  new LoginUseCase(new UserRepository()),
+  new OtpVerify(new UserRepository()),
+  new EditUserDetailsUseCase(new UserRepository)
 );
 
 const router = Router();
@@ -18,10 +23,17 @@ router.post("/signup", signUpValidator, (req: Request, res: Response) =>
   userController.signUp(req, res)
 );
 
+router.post("/verify-otp", (req: Request, res: Response) =>
+  userController.otVerify(req, res)
+);
+
 router.post("/login", loginValidator, (req: Request, res: Response) =>
   userController.login(req, res)
 );
 
-
-
+router.patch(
+  "/edit-user/:userId",
+  authenticateUser,
+  (req: Request, res: Response) => userController.editUser(req, res)
+);
 export default router;

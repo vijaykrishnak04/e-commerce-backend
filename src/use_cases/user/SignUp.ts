@@ -1,5 +1,6 @@
 // src/use_cases/SignUp.ts
 
+import { sendMail } from "../../services/mailer";
 import { User, IUser } from "../../entities/User";
 import { IUserRepository } from "../../repositories/UserRepository";
 import bcrypt from "bcryptjs";
@@ -10,7 +11,8 @@ export class SignUpUseCase {
   async execute(
     username: string,
     password: string,
-    email: string
+    email: string,
+    phone: { code: string; number: string }
   ): Promise<IUser> {
     // Input validation (this can be more complex with proper validation rules)
     if (!username.trim() || !password || password.length < 6 || !email.trim()) {
@@ -32,9 +34,14 @@ export class SignUpUseCase {
       username: username,
       password: hashedPassword,
       email: email,
+      phone: phone,
     });
 
-    // Persist the new user entity to the repository
-    return await this.userRepository.create(user);
+    const OTP = Math.floor(100000 + Math.random() * 900000)
+    console.log(OTP);
+    
+    sendMail(email, username, OTP)
+
+    return user;
   }
 }

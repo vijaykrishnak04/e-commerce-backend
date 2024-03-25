@@ -1,18 +1,57 @@
 // src/routes/productRoutes.ts
 
-import { Router } from 'express';
-import { ProductController } from '../controllers/ProductController';
-import { AddProductUseCase } from 'src/use_cases/product/AddProduct';
-import { ProductRepository } from 'src/repositories/ProductRepository';
+import { NextFunction, Request, Response, Router } from "express";
+import { ProductController } from "../controllers/ProductController";
+import { AddProductUseCase } from "../use_cases/product/AddProduct";
+import { ProductRepository } from "../repositories/ProductRepository";
+import { ViewProductUseCase } from "../use_cases/product/ViewProduct";
+import { authenticateAdmin } from "../middlewares/authenticate";
+import { uploadFiles } from "../services/cloudinary";
+import { DeleteProductUseCase } from "../use_cases/product/DeleteProduct";
 
-const router = Router();
 const productController = new ProductController(
-    new AddProductUseCase(new ProductRepository)
+  new AddProductUseCase(new ProductRepository()),
+  new ViewProductUseCase(new ProductRepository()),
+  new DeleteProductUseCase(new ProductRepository())
 );
 
-router.post('/add-product', productController.addProduct)
-router.get('/', productController.getProducts);
-router.get('/search', productController.searchProducts);
-router.get('/:id', productController.getProductById);
+const router = Router();
+
+router.post(
+  "/add-product",
+  authenticateAdmin,
+  uploadFiles,
+  (req: Request, res: Response) => {
+    productController.addProduct(req, res);
+  }
+);
+
+router.delete(
+  "/delete-product/:id",
+  authenticateAdmin,
+  (req: Request, res: Response) => {
+    productController.deleteProduct(req, res);
+  }
+);
+
+router.get("/get-all-products", (req: Request, res: Response) => {
+  productController.getProducts(req, res);
+});
+
+router.get("/new-arrival", (req: Request, res: Response) => {
+  productController.getProducts(req, res);
+});
+
+router.get("/category/:category", (req: Request, res: Response) => {
+  productController.getProductByCategory(req, res);
+});
+
+router.get("/search-product/:query", (req: Request, res: Response) => {
+  productController.searchProducts(req, res);
+});
+
+router.get("/:id", (req: Request, res: Response) => {
+  productController.getProductById(req, res);
+});
 
 export default router;

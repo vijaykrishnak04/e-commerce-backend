@@ -1,85 +1,55 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, ObjectId, Schema } from "mongoose";
 
-// Define an interface for Specification nested in Product
-interface ISpecification {
-  title?: string;
-  description?: string;
+// Address Schema
+const AddressSchema: Schema = new Schema(
+  {
+    fullname: { type: String, requierd: true },
+    street: { type: String, required: true },
+    landmark: { type: String },
+    city: { type: String, required: true },
+    district: { type: String, required: true },
+    state: { type: String, required: true },
+    pinCode: { type: String, required: true },
+    phone: { type: Number, required: true },
+  },
+  { _id: false }
+); // _id: false since it's a subdocument
+
+export interface IUser extends Document {
+  username: string;
+  password: string;
+  phone: {
+    code: string;
+    number: number;
+  };
+  email: string;
+  roles: string[];
+  address: {
+    fullname: string;
+    street: string;
+    landmark?: string;
+    city: string;
+    district: string;
+    state: string;
+    pinCode: string;
+    phone: number;
+  }[];
 }
 
-// Define an interface for Image nested in Product
-interface IImage {
-  url: string;
-  publicId: string;
-}
+const UserSchema: Schema = new Schema({
+  username: { type: String, required: true },
+  password: { type: String, required: true },
 
-// Define an interface for the Product document
-export interface IProduct extends Document {
-  productName: string;
-  productPrice: number;
-  stock: number;
-  productDescription: string;
-  category: string;
-  subcategory: string;
-  deliveryTime: 'In Stock' | 'Arranging Stock' | 'Out Of Stock';
-  size?: string;
-  sizeType?: string;
-  specifications: ISpecification[];
-  images: IImage[];
-}
-
-// Define the schema for Product, incorporating the interfaces
-const productSchema: Schema<IProduct> = new Schema({
-  productName: {
-    type: String,
-    required: true,
+  phone: {
+    code: { type: String, required: true },
+    number: { type: Number, required: true },
   },
-  productPrice: {
-    type: Number,
-    required: true,
+  email: { type: String, required: true },
+  roles: {
+    type: [String],
+    default: ["user"],
   },
-  stock: {
-    type: Number,
-    required: true,
-  },
-  productDescription: {
-    type: String,
-    required: true,
-  },
-  category: {
-    type: String,
-    required: true,
-  },
-  subcategory: {
-    type: String,
-    required: true,
-  },
-  deliveryTime: {
-    type: String,
-    enum: ['In Stock', 'Arranging Stock', 'Out Of Stock'],
-    default: 'In Stock',
-    required: true,
-  },
-  size: String,
-  sizeType: String,
-  specifications: [
-    {
-      title: String,
-      description: String,
-    },
-  ],
-  images: [
-    {
-      url: {
-        type: String,
-        required: true,
-      },
-      publicId: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
+  address: [AddressSchema], // Users can have multiple addresses
 });
 
-// Create a model for Product using the interface and schema defined
-export const Product = mongoose.model<IProduct>('Product', productSchema);
+export const User = mongoose.model<IUser>("User", UserSchema);

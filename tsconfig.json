@@ -13,9 +13,10 @@
     "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "removeComments": true
+    "removeComments": true,
+    "typeRoots": ["./node_modules/@types", "src/types"],
   },
-  "include": ["src/**/*.ts"], 
+  "include": ["src/**/*.ts", "src/types/**/*"], 
   "exclude": [
     "node_modules"
   ]

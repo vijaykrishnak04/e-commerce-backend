@@ -1,4 +1,4 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose, { Document, Schema } from "mongoose";
 
 // Define an interface for Specification nested in Product
 interface ISpecification {
@@ -18,10 +18,13 @@ export interface IProduct extends Document {
   productPrice: number;
   stock: number;
   productDescription: string;
+  productType: string;
+  brand: string;
+  colors: string[];
   category: string;
-  subcategory: string;
-  deliveryTime: 'In Stock' | 'Arranging Stock' | 'Out Of Stock';
-  size?: string;
+  subcategory: string[];
+  deliveryTime: "In Stock" | "Arranging Stock" | "Out Of Stock";
+  size?: string[];
   sizeType?: string;
   specifications: ISpecification[];
   images: IImage[];
@@ -45,22 +48,38 @@ const productSchema: Schema<IProduct> = new Schema({
     type: String,
     required: true,
   },
+  brand: {
+    type: String,
+    required: true,
+  },
+  colors: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
   category: {
     type: String,
     required: true,
   },
-  subcategory: {
-    type: String,
-    required: true,
-  },
+  subcategory: [
+    {
+      type: String,
+      required: true,
+    },
+  ],
   deliveryTime: {
     type: String,
-    enum: ['In Stock', 'Arranging Stock', 'Out Of Stock'],
-    default: 'In Stock',
+    enum: ["In Stock", "Arranging Stock", "Out Of Stock"],
+    default: "In Stock",
     required: true,
   },
-  size: String,
-  sizeType: String,
+  size: [
+    {
+      type: String,
+    },
+  ],
+  sizeType: { type: String },
   specifications: [
     {
       title: String,
@@ -82,4 +101,4 @@ const productSchema: Schema<IProduct> = new Schema({
 });
 
 // Create a model for Product using the interface and schema defined
-export const Product = mongoose.model<IProduct>('Product', productSchema);
+export const Product = mongoose.model<IProduct>("Product", productSchema);

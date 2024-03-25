@@ -1,61 +1,63 @@
 // src/controllers/ProductController.ts
 
 import { Request, Response } from "express";
-import { Product } from "src/entities/Product";
-import { AddProductUseCase } from "src/use_cases/product/AddProduct";
+import { AddProductUseCase } from "../use_cases/product/AddProduct";
+import { ViewProductUseCase } from "../use_cases/product/ViewProduct";
+import { DeleteProductUseCase } from "../use_cases/product/DeleteProduct";
+import mongoose from "mongoose";
 
 export class ProductController {
-  constructor(private addProductUseCase: AddProductUseCase) {}
+  constructor(
+    private addProductUseCase: AddProductUseCase,
+    private viewProductUseCase: ViewProductUseCase,
+    private deleteProductUseCase: DeleteProductUseCase
+  ) {}
 
   public async addProduct(req: Request, res: Response): Promise<Response> {
     try {
-      const {
-        productName,
-        productPrice,
-        stock,
-        productDescription,
-        category,
-        subcategory,
-        deliveryTime,
-        size,
-        sizeType,
-        specifications,
-      } = req.body;
+      const productData = {
+        ...req.body,
+        files: req.files,
+      };
 
-      const parsedData = JSON.parse(specifications);
-
-      const numericProductPrice = parseFloat(productPrice);
-      const numericStock = parseInt(stock, 10);
-
-      const images = req.files.map((file) => ({
-        url: file.path,
-        publicId: file.filename,
-      }));
-
-      const newProduct = new Product({
-        productName,
-        productPrice: numericProductPrice,
-        stock: numericStock,
-        productDescription,
-        category,
-        subcategory,
-        deliveryTime,
-        size,
-        sizeType,
-        specifications: parsedData,
-        images,
-      });
-      const addedProduct = await this.addProductUseCase.execute(newProduct);
-      return res.json(addedProduct);
+      const addedProduct = await this.addProductUseCase.execute(productData);
+      console.log(addedProduct);
+      return res.status(200).json({ addedProduct, success: true });
     } catch (error) {
+      console.log(error);
+
       return res.status(500).json({ message: error.message });
     }
   }
 
   public async getProducts(req: Request, res: Response): Promise<Response> {
     try {
-      const products = await this.productRepository.findAll();
-      return res.json(products);
+      const products = await this.viewProductUseCase.getAllProducts();
+      return res.status(200).json(products);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  public async getNewArrived(req: Request, res: Response): Promise<Response> {
+    try {
+      const products = await this.viewProductUseCase.getNewArrival();
+      return res.status(200).json(products);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  public async getProductByCategory(
+    req: Request,
+    res: Response
+  ): Promise<Response> {
+    try {
+      const { category } = req.params;
+      const products = await this.viewProductUseCase.getProductsByCategory(
+        category
+      );
+      return res.status(200).json(products);
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
@@ -63,11 +65,9 @@ export class ProductController {
 
   public async getProductById(req: Request, res: Response): Promise<Response> {
     try {
-      const product = await this.productRepository.findById(req.params.id);
-      if (!product) {
-        return res.status(404).json({ message: "Product not found" });
-      }
-      return res.json(product);
+      const productId = new mongoose.Types.ObjectId(req.params.id);
+      const product = await this.viewProductUseCase.getProductById(productId);
+      return res.status(200).json(product);
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
@@ -75,9 +75,26 @@ export class ProductController {
 
   public async searchProducts(req: Request, res: Response): Promise<Response> {
     try {
-      const query = req.query.q as string;
-      const products = await this.productRepository.search(query);
-      return res.json(products);
+      const { query } = req.params;
+      const products = await this.viewProductUseCase.searchProducts(query);
+      return res.status(200).json(products);
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  public async deleteProduct(req: Request, res: Response): Promise<Response> {
+    try {
+      const id = new mongoose.Types.ObjectId(req.params.id);
+      const success = await this.deleteProductUseCase.execute(id);
+
+      if (success) {
+        return res
+          .status(200)
+          .json({ message: "Product successfully deleted.", id });
+      } else {
+        return res.status(404).json({ message: "Product not found." });
+      }
     } catch (error) {
       return res.status(500).json({ message: error.message });
     }
