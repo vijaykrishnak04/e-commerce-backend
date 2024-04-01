@@ -2,32 +2,30 @@ import Razorpay from "razorpay";
 import { IOrderRepository } from "../../repositories/OrderRepository";
 import { ICouponRepository } from "../../repositories/CouponRepository";
 import { ICartRepository } from "../../repositories/CartRepository";
+import Stripe from "stripe";
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export class CreateOrderUseCase {
-  private razorpayInstance: Razorpay;
-
   constructor(
     private orderRepository: IOrderRepository,
     private couponRepository: ICouponRepository,
     private cartRepository: ICartRepository
-  ) {
-    this.razorpayInstance = new Razorpay({
-      key_id: process.env.RAZORPAY_KEY, // Ensure these are set in your environment
-      key_secret: process.env.RAZORPAY_SECRET,
-    });
-  }
+  ) {}
 
   async execute(orderData: any) {
     try {
       console.log(orderData);
-
-      if (orderData.paymentMethod === "razorpay") {
-        const razorpayOrder = await this.createRazorpayOrder(
-          orderData.totalPrice
+      if (orderData.paymentMethod === "stripe") {
+        const { client_secret, id } = await this.createStripePaymentIntent(
+          orderData.totalPrice,
+          orderData.userMail
         );
+        console.log(client_secret);
+
         orderData.paymentDetails = {
-          orderId: razorpayOrder.id,
-          paymentGateway: "Razorpay",
+          sessionId: id,
+          paymentIntentId: client_secret,
+          paymentGateway: "Stripe",
         };
       } else if (orderData.paymentMethod === "Cash on Delivery") {
         orderData.orderStatus = "Placed";
@@ -50,7 +48,7 @@ export class CreateOrderUseCase {
       const cart = await this.cartRepository.findByUserId(orderData.userId);
 
       // First, ensure orderData.items is an array and has elements
-      if (Array.isArray(orderData.items) && orderData.items.length > 0) {
+      if (Array.isArray(orderData.items) && orderData.items.length > 0 && cart?.items.length) {
         const orderItemIds = orderData.items
           .map((item: any) => item._id?.toString())
           .filter((id: any) => id !== undefined);
@@ -59,9 +57,6 @@ export class CreateOrderUseCase {
         const updatedItems = cart.items.filter(
           (cartItem) => !orderItemIds.includes(cartItem._id.toString())
         );
-
-        console.log(updatedItems);
-
         // Update the cart in the repository with the filtered items
         await this.cartRepository.updateById(cart._id, { items: updatedItems });
       } else {
@@ -77,19 +72,38 @@ export class CreateOrderUseCase {
     }
   }
 
-  private async createRazorpayOrder(amount: number) {
-    const options = {
-      amount: amount * 100, // Convert to the smallest currency unit
-      currency: "INR",
-      receipt: `receipt_${new Date().getTime()}`,
-      payment_capture: 1,
-    };
-
+  private async createStripePaymentIntent(
+    amount: number,
+    customerEmail: string
+  ) {
     try {
-      const order = await this.razorpayInstance.orders.create(options);
-      return order;
+      const session = await stripe.checkout.sessions.create({
+        ui_mode: "embedded",
+        customer_email: customerEmail, // Dynamic email
+        submit_type: "pay",
+        phone_number_collection: {
+          enabled: true,
+        },
+        billing_address_collection: "auto",
+        line_items: [
+          {
+            price_data: {
+              currency: "usd", // Adjust to your desired currency
+              product_data: {
+                name: "Total Amount",
+              },
+              unit_amount: amount * 100, // Convert amount to cents
+            },
+            quantity: 1,
+          },
+        ],
+        mode: "payment",
+        redirect_on_completion: "never",
+      });
+      return session;
     } catch (error) {
-      throw new Error("Failed to create Razorpay order");
+      console.error("Failed to create Stripe payment intent", error);
+      throw new Error("Failed to initiate payment");
     }
   }
 }

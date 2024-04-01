@@ -1,5 +1,11 @@
 import mongoose, { Document, Schema } from "mongoose";
 
+interface IShippingDetails {
+  provider: string; // Shipping provider (e.g., UPS, FedEx)
+  url: string; // Shipping provider (e.g., UPS, FedEx)
+  trackingNumber?: string; // Shipping tracking number
+  shippingStatus: "Not Shipped" | "Shipped" | "In Transit" | "Delivered"; // Current status of the shipment
+}
 interface IOrderItem {
   _id?: mongoose.Types.ObjectId;
   product: mongoose.Types.ObjectId | string; // Flexible product ID representation
@@ -12,6 +18,7 @@ interface IOrderItem {
     url: string;
     publicId: string;
   }; // Nested object for image details
+  shippingDetails?: IShippingDetails;
 }
 
 interface IOrderCancellationReturn {
@@ -23,15 +30,9 @@ interface IOrderCancellationReturn {
 }
 
 interface IPaymentDetails {
-  paymentId?: string;
-  orderId: string; // Unique identifier for the payment transaction
+  sessionId?: string;
+  paymentIntentId: string; // Unique identifier for the payment transaction
   paymentGateway: string; // The payment gateway used (e.g., Stripe, PayPal)
-}
-
-interface IShippingDetails {
-  provider: string; // Shipping provider (e.g., UPS, FedEx)
-  trackingNumber?: string; // Shipping tracking number
-  shippingStatus: "Not Shipped" | "Shipped" | "In Transit" | "Delivered"; // Current status of the shipment
 }
 
 export interface IOrder extends Document {
@@ -49,13 +50,26 @@ export interface IOrder extends Document {
   };
   orderStatus: "Pending" | "Placed" | "Shipped" | "Delivered" | "Cancelled";
   paymentStatus: "Pending" | "Completed" | "Failed" | "Refunded";
-  paymentMethod: "Credit Card" | "Debit Card" | "razorpay" | "Cash on Delivery";
+  paymentMethod: "Credit Card" | "Debit Card" | "stripe" | "Cash on Delivery";
   paymentDetails: IPaymentDetails;
   deliveryDate: Date;
   totalPrice: number;
   cancellationReturnDetails?: IOrderCancellationReturn;
-  shippingDetails?: IShippingDetails;
 }
+
+const ShippingDetailsSchema: Schema<IShippingDetails> = new Schema(
+  {
+    provider: { type: String, required: true },
+    trackingNumber: { type: String },
+    url: { type: String},
+    shippingStatus: {
+      type: String,
+      enum: ["Not Shipped", "Shipped", "In Transit", "Delivered"],
+      default: "Not Shipped",
+    },
+  },
+  { _id: false }
+);
 
 const orderItemSchema: mongoose.Schema<IOrderItem> = new mongoose.Schema(
   {
@@ -87,6 +101,7 @@ const orderItemSchema: mongoose.Schema<IOrderItem> = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed, // Allow flexibility for image storage
       default: {}, // Set a default empty object for image
     },
+    shippingDetails: ShippingDetailsSchema,
   },
   { _id: false }
 );
@@ -107,22 +122,9 @@ const AddressSchema: Schema = new Schema(
 
 const PaymentDetailsSchema: Schema<IPaymentDetails> = new Schema(
   {
-    paymentId: { type: String },
-    orderId: { type: String, required: true },
+    sessionId: { type: String },
+    paymentIntentId: { type: String, required: true },
     paymentGateway: { type: String, required: true },
-  },
-  { _id: false }
-);
-
-const ShippingDetailsSchema: Schema<IShippingDetails> = new Schema(
-  {
-    provider: { type: String, required: true },
-    trackingNumber: { type: String },
-    shippingStatus: {
-      type: String,
-      enum: ["Not Shipped", "Shipped", "In Transit", "Delivered"],
-      default: "Not Shipped",
-    },
   },
   { _id: false }
 );
@@ -165,7 +167,7 @@ const orderSchema: Schema<IOrder> = new Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ["Credit Card", "Debit Card", "razorpay", "Cash on Delivery"],
+      enum: ["Credit Card", "Debit Card", "stripe", "Cash on Delivery"],
       required: true,
     },
     paymentDetails: PaymentDetailsSchema,
@@ -177,7 +179,6 @@ const orderSchema: Schema<IOrder> = new Schema(
       required: true,
     },
     cancellationReturnDetails: OrderCancellationReturnSchema,
-    shippingDetails: ShippingDetailsSchema,
   },
   {
     timestamps: true,

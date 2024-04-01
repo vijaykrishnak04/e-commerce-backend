@@ -31,16 +31,14 @@ export class OrderController {
 
   async verifyPayment(req: Request, res: Response) {
     try {
-      const { id, paymentId, orderId, signature } = req.body;
+      const { orderId, sessionId } = req.body;
       const newOrder = await this.verifyPaymentUseCase.execute(
-        paymentId,
-        orderId,
-        signature,
-        id
+        sessionId,
+        orderId
       );
       return res.status(201).json({ success: true, order: newOrder });
     } catch (error) {
-      return res.status(400).json({ message: error.message });
+      return res.status(400).json({ success: false, message: error.message });
     }
   }
 
@@ -100,8 +98,6 @@ export class OrderController {
 
   async getAllOrders(req: Request, res: Response): Promise<Response> {
     try {
-      console.log('bruhh"s here');
-      
       const orders = await this.getOrderDetailsUseCase.getAll();
       return res.status(200).json({ success: true, orders });
     } catch (error) {

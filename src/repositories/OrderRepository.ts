@@ -11,8 +11,7 @@ export interface IOrderRepository {
   ): Promise<IOrder>;
   updatePaymentStatus(
     orderId: mongoose.Types.ObjectId,
-    status: string,
-    paymentId: string
+    status: string
   ): Promise<IOrder>;
   findById(orderId: mongoose.Types.ObjectId): Promise<IOrder | null>;
   findByUser(userId: mongoose.Types.ObjectId): Promise<IOrder[] | null>; // Specific to orders
@@ -23,6 +22,7 @@ export class OrderRepository implements IOrderRepository {
     try {
       return await Order.find()
         .populate("userId", "username email") // Populating only username and email
+        .sort({ createdAt: -1 })
         .exec();
     } catch (error) {
       console.log(error);
@@ -72,8 +72,7 @@ export class OrderRepository implements IOrderRepository {
 
   async updatePaymentStatus(
     orderId: mongoose.Types.ObjectId,
-    status: string,
-    paymentId: string
+    status: string
   ): Promise<IOrder> {
     try {
       // Using dot notation to access nested fields
@@ -81,7 +80,6 @@ export class OrderRepository implements IOrderRepository {
         orderId,
         {
           $set: {
-            "paymentDetails.paymentId": paymentId, // Assuming the field is named transactionId, adjust if needed
             paymentStatus: status,
             orderStatus: "Placed",
           },

@@ -14,7 +14,6 @@ export class GetOrderDetailsUseCase {
 
   async getAll() {
     const orderDetails = await this.orderRepository.findAll();
-    console.log(orderDetails + "all orders");
     if (!orderDetails) throw new Error("Order not found");
     return orderDetails;
   }
