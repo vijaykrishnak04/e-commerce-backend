@@ -13,6 +13,10 @@ export interface IProductRepository {
   findByName(productName: string): Promise<IProduct | null>;
   findByCategory(category: string): Promise<IProduct[]>;
   search(query: string): Promise<IProduct[]>;
+  updateById(
+    productId: mongoose.Types.ObjectId,
+    updateData: Partial<IProduct>
+  ): Promise<IProduct>;
   deleteById(productId: mongoose.Types.ObjectId): Promise<Boolean>;
 }
 
@@ -36,7 +40,7 @@ export class ProductRepository implements IProductRepository {
   }
 
   public async findNew(): Promise<IProduct[]> {
-    return await Product.find().sort({ createdAt: -1 }).limit(50)
+    return await Product.find().sort({ createdAt: -1 }).limit(50);
   }
 
   public async findById(
@@ -91,6 +95,27 @@ export class ProductRepository implements IProductRepository {
     if (searchConditions.length === 0) return [];
 
     return await Product.find({ $or: searchConditions }).exec();
+  }
+
+  public async updateById(
+    productId: mongoose.Types.ObjectId,
+    updateData: Partial<IProduct> // Use Partial to indicate all properties are optional
+  ): Promise<IProduct> {
+    // Use findByIdAndUpdate to find the category by ID and update it
+    const updatedProduct = await Product.findByIdAndUpdate(
+      productId,
+      updateData,
+      {
+        new: true, // Return the modified document rather than the original
+        runValidators: true, // Ensures that your model's validations are considered before updating
+      }
+    );
+
+    if (!updatedProduct) {
+      throw new Error("Category not found");
+    }
+
+    return updatedProduct;
   }
 
   public async deleteById(

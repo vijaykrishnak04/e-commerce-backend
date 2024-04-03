@@ -8,11 +8,13 @@ import { ViewProductUseCase } from "../use_cases/product/ViewProduct";
 import { authenticateAdmin } from "../middlewares/authenticate";
 import { uploadFiles } from "../services/cloudinary";
 import { DeleteProductUseCase } from "../use_cases/product/DeleteProduct";
+import { EditProductUseCase } from "../use_cases/product/EditProduct";
 
 const productController = new ProductController(
   new AddProductUseCase(new ProductRepository()),
   new ViewProductUseCase(new ProductRepository()),
-  new DeleteProductUseCase(new ProductRepository())
+  new DeleteProductUseCase(new ProductRepository()),
+  new EditProductUseCase(new ProductRepository())
 );
 
 const router = Router();
@@ -23,6 +25,15 @@ router.post(
   uploadFiles,
   (req: Request, res: Response) => {
     productController.addProduct(req, res);
+  }
+);
+
+router.patch(
+  "/edit-product/:productId",
+  authenticateAdmin,
+  uploadFiles,
+  (req: Request, res: Response) => {
+    productController.editProduct(req, res);
   }
 );
 

@@ -39,11 +39,9 @@ const categorySchema: Schema<ICategory> = new Schema(
     bannerImage: {
       url: {
         type: String,
-        required: true,
       },
       publicId: {
         type: String,
-        required: true,
       },
     },
     subcategories: [

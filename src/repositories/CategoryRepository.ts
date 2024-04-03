@@ -7,7 +7,7 @@ export interface ICategoryRepository {
   create(categoryData: Partial<ICategory>): Promise<ICategory>;
   deleteById(categoryId: mongoose.Types.ObjectId): Promise<boolean>;
   findAll(): Promise<ICategory[]>;
-  findByName(categoryName: string): Promise<boolean>;
+  findByName(categoryName: string): Promise<ICategory>;
   updateById(
     categoryId: mongoose.Types.ObjectId,
     updateData: Partial<ICategory>
@@ -146,9 +146,9 @@ export class CategoryRepository implements ICategoryRepository {
     return Category.find().exec();
   }
 
-  public async findByName(categoryName: string): Promise<boolean> {
+  public async findByName(categoryName: string): Promise<ICategory> {
     const result = await Category.findOne({ categoryName: categoryName });
-    return result !== null;
+    return result;
   }
 
   public async updateById(

@@ -19,6 +19,7 @@ export class EditCategory {
     id: mongoose.Types.ObjectId,
     categoryData: CategoryData
   ): Promise<ICategory> {
+    console.log(categoryData);
     try {
       // Collect all images to delete if specified
       const imagesToDelete: string[] = [];
@@ -27,6 +28,20 @@ export class EditCategory {
       }
       if (categoryData?.BannerToDelete) {
         imagesToDelete.push(categoryData.BannerToDelete);
+      }
+
+      const categoryExist = await this.categoryRepository.findByName(
+        categoryData.categoryName
+      );
+      if (categoryExist.categoryName === categoryData.categoryName && id !== categoryExist._id) {
+        if (categoryData?.files) {
+          let deletingFiles = [];
+          for (const { filename } of categoryData.files) {
+            deletingFiles.push(filename);
+          }
+          deleteFiles(deletingFiles);
+        }
+        throw new Error("category with this name already exist");
       }
 
       // Delete old images from cloud storage
@@ -45,14 +60,33 @@ export class EditCategory {
       };
 
       // If there are new files uploaded, process them
-      if (categoryData.files && categoryData.files.length) {
-        categoryData.files.forEach((file, index) => {
-          const key = index === 0 ? "categoryImage" : "bannerImage";
-          updatedCategory[key] = {
-            url: file.path,
-            publicId: file.filename,
-          };
-        });
+      // Check if ThumbnailToDelete is present
+      if (categoryData?.ThumbnailToDelete && !categoryData?.BannerToDelete) {
+        // Assign the new thumbnail image to categoryImage field
+        updatedCategory.categoryImage = {
+          url: categoryData.files[0].path,
+          publicId: categoryData.files[0].filename,
+        };
+      }
+
+      // Check if BannerToDelete is present
+      if (categoryData?.BannerToDelete && !categoryData?.ThumbnailToDelete) {
+        // Assign the new banner image to bannerImage field
+        updatedCategory.bannerImage = {
+          url: categoryData.files[0].path,
+          publicId: categoryData.files[0].filename,
+        };
+      }
+
+      if (categoryData?.files && categoryData?.files.length >= 2) {
+        updatedCategory.categoryImage = {
+          url: categoryData.files[0].path,
+          publicId: categoryData.files[0].filename,
+        };
+        updatedCategory.bannerImage = {
+          url: categoryData.files[1].path,
+          publicId: categoryData.files[1].filename,
+        };
       }
 
       // Update the category in the database

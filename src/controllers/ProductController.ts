@@ -4,13 +4,15 @@ import { Request, Response } from "express";
 import { AddProductUseCase } from "../use_cases/product/AddProduct";
 import { ViewProductUseCase } from "../use_cases/product/ViewProduct";
 import { DeleteProductUseCase } from "../use_cases/product/DeleteProduct";
+import { EditProductUseCase } from "../use_cases/product/EditProduct";
 import mongoose from "mongoose";
 
 export class ProductController {
   constructor(
     private addProductUseCase: AddProductUseCase,
     private viewProductUseCase: ViewProductUseCase,
-    private deleteProductUseCase: DeleteProductUseCase
+    private deleteProductUseCase: DeleteProductUseCase,
+    private editProductUseCase: EditProductUseCase
   ) {}
 
   public async addProduct(req: Request, res: Response): Promise<Response> {
@@ -21,6 +23,30 @@ export class ProductController {
       };
 
       const addedProduct = await this.addProductUseCase.execute(productData);
+      console.log(addedProduct);
+      return res.status(200).json({ addedProduct, success: true });
+    } catch (error) {
+      console.log(error);
+
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  public async editProduct(req: Request, res: Response): Promise<Response> {
+    try {
+      console.log(req.params);
+      const productId = new mongoose.Types.ObjectId(req.params.productId);
+      const productData = {
+        ...req.body,
+        files: req?.files,
+      };
+
+      console.log(productData);
+      
+      const addedProduct = await this.editProductUseCase.execute(
+        productId,
+        productData
+      );
       console.log(addedProduct);
       return res.status(200).json({ addedProduct, success: true });
     } catch (error) {

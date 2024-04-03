@@ -1,19 +1,30 @@
-// src/use_cases/product/AddProduct.ts
-
-import { json } from "express";
+import mongoose from "mongoose";
 import { IProduct } from "../../entities/Product";
 import { IProductRepository } from "../../repositories/ProductRepository";
 import { deleteFiles } from "../../services/cloudinary";
 
-export class AddProductUseCase {
+export class EditProductUseCase {
   constructor(private productRepository: IProductRepository) {}
 
-  async execute(productData: any): Promise<IProduct> {
-    console.log(productData);
+  async execute(
+    productId: mongoose.Types.ObjectId,
+    productData: any
+  ): Promise<IProduct> {
     const productExist = await this.productRepository.findByName(
       productData.productName
     );
-    if (productExist) {
+
+    console.log("productId:", productId);
+    console.log("productExist._id:", productExist._id);
+    console.log(
+      "Is productId equal to productExist._id?",
+      productId.equals(productExist._id)
+    );
+
+    if (
+      productExist.productName === productData.productName &&
+      !productId.equals(productExist._id)
+    ) {
       if (productData.files) {
         let deletingFiles = [];
         for (const { filename } of productData.files) {
@@ -42,9 +53,9 @@ export class AddProductUseCase {
         : productData.specifications;
 
     const parsedColors =
-      typeof productData.color === "string"
-        ? safelyParseJSON(productData.color)
-        : productData.color;
+      typeof productData?.color === "string"
+        ? safelyParseJSON(productData?.color)
+        : productData?.color;
 
     const parsedSubcategory = productData.subcategory.split(",");
     const parsedSize = productData?.size && productData.size.split(",");
@@ -53,12 +64,32 @@ export class AddProductUseCase {
     const numericStock = parseInt(productData.stock, 10);
 
     // Handle potential undefined `files`
-    const images = productData.files
-      ? productData.files.map((file: { path: string; filename: string }) => ({
-          url: file.path,
-          publicId: file.filename,
-        }))
-      : [];
+
+    let deletingFiles: any[] = [];
+
+    const updatedImages = productData?.files
+      ? productExist.images.flatMap((image, index) => {
+          return productData.files.map(
+            (file: {
+              path: string;
+              filename: string;
+              originalname: string;
+            }) => {
+              if (file.originalname === `productImage${index + 1}`) {
+                deletingFiles.push(image.publicId);
+                return {
+                  url: file.path,
+                  publicId: file.filename,
+                };
+              } else {
+                return image; // If no update, return the original image
+              }
+            }
+          );
+        })
+      : productExist.images;
+
+    deleteFiles(deletingFiles);
 
     const newProductData = {
       ...productData,
@@ -68,11 +99,10 @@ export class AddProductUseCase {
       subcategory: parsedSubcategory,
       colors: parsedColors,
       size: parsedSize,
-      images,
+      images: updatedImages,
     };
 
-    // Any additional business logic or validations can go here
-
-    return await this.productRepository.add(newProductData);
+    console.log(newProductData.images);
+    return await this.productRepository.updateById(productId, newProductData);
   }
 }

@@ -14,11 +14,9 @@ export class AddCategory {
       throw new Error("category with this name already exist");
     }
     const { filename, path } = categoryData.files[0];
-    const bannerImage = categoryData.files[1];
+    const bannerImage = categoryData?.files[1];
 
-    console.log(categoryData);
-
-    const category = {
+    const category: Partial<ICategory> = {
       categoryName: categoryData.categoryName,
       subcategories: categoryData.subcategories,
       feature: categoryData.feature,
@@ -26,11 +24,14 @@ export class AddCategory {
         url: path,
         publicId: filename,
       },
-      bannerImage: {
-        url: bannerImage.path,
-        publicId: bannerImage.filename,
-      },
     };
+
+    if (bannerImage) {
+      category.bannerImage = {
+        url: bannerImage?.path,
+        publicId: bannerImage?.filename,
+      };
+    }
     return await this.categoryRepository.create(category);
   }
 }
