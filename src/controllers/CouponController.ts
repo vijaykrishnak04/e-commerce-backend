@@ -97,7 +97,7 @@ export class CouponController {
 
       // Your existing logic to fetch the coupon using the coupon code
       const coupon = await this.getAllCouponsUseCase.getCouponByCode(
-        couponCode
+        couponCode, userEmail
       );
       if (!coupon) {
         return res.status(404).json({ message: "Coupon not found" });
@@ -110,7 +110,7 @@ export class CouponController {
     } catch (error) {
       return res
         .status(400)
-        .json({ message: "Failed to find coupon: " + error.message });
+        .json({ message:error.message });
     }
   }
 }

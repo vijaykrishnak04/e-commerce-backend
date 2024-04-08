@@ -14,14 +14,11 @@ export class CreateOrderUseCase {
 
   async execute(orderData: any) {
     try {
-      console.log(orderData);
       if (orderData.paymentMethod === "stripe") {
         const { client_secret, id } = await this.createStripePaymentIntent(
           orderData.totalPrice,
           orderData.userMail
         );
-        console.log(client_secret);
-
         orderData.paymentDetails = {
           sessionId: id,
           paymentIntentId: client_secret,

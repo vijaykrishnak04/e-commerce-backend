@@ -31,7 +31,7 @@ export async function sendMail(email: string, fullName: string, OTP: number): Pr
     const mailData: IMailOptions = {
       from: process.env.MAILER_EMAIL as string,
       to: email,
-      subject: "Here is the OTP for registering with our I-Teach",
+      subject: "Here is the OTP for registering with our East-electronics",
       text: `Dear ${fullName},\n\nYour One-Time Password (OTP) for registration is: ${OTP}\n\nPlease enter this OTP to complete your registration. This OTP is valid for 3 minutes.\n\nThank you,\nThe i_Teach Team`,
       html: `<div style="font-family: Arial, sans-serif; color: #333;">
           <h3 style="color: #2b56e3;">I-Teach Registration OTP</h3>
@@ -41,7 +41,7 @@ export async function sendMail(email: string, fullName: string, OTP: number): Pr
           <p>Please enter this OTP to complete your registration.</p>
           <p>This OTP is valid for 3 minutes.</p>
           <p>Thank you,</p>
-          <p>The i_Teach Team</p>
+          <p>The East-electronics Team</p>
         </div>`,
     };
 
