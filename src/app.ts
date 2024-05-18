@@ -20,9 +20,18 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
+const corsOptions = {
+  origin: [
+    "http://192.168.29.116:5173", // Add your allowed URL here
+    "http://localhost:5173",
+    "https://bq4r49z7-5173.inc1.devtunnels.ms",
+    "https://eastbrand.netlify.app"
+  ],
+};
+
+app.use(cors(corsOptions));
 app.use(helmet());
-app.use(express.json());  
+app.use(express.json());
 
 //routes
 app.use("/api/v1/admin", adminRoutes);

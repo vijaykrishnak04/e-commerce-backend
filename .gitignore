@@ -1,3 +1,5 @@
 .env
 node_modules
 dist
+jest.congig.ts
+package-lock.json

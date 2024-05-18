@@ -7,6 +7,7 @@ import { GetOrderDetailsUseCase } from "../use_cases/order/GetOrderDetails";
 import { ListOrdersByUserUseCase } from "../use_cases/order/ListOrdersByUser";
 import mongoose from "mongoose";
 import { VerifyPaymentUseCase } from "../use_cases/order/VerifyPayment";
+import { UpdateShippingStatus } from "../use_cases/order/UpdateShipping";
 
 export class OrderController {
   constructor(
@@ -16,7 +17,8 @@ export class OrderController {
     private cancelOrderUseCase: CancelOrderUseCase,
     private returnOrderUseCase: ReturnOrderUseCase,
     private getOrderDetailsUseCase: GetOrderDetailsUseCase,
-    private listOrdersByUserUseCase: ListOrdersByUserUseCase
+    private listOrdersByUserUseCase: ListOrdersByUserUseCase,
+    private updateShippingStatusUseCase: UpdateShippingStatus
   ) {}
 
   async createOrder(req: Request, res: Response): Promise<Response> {
@@ -49,6 +51,20 @@ export class OrderController {
       const updatedOrder = await this.updateOrderStatusUseCase.execute(
         orderId,
         status
+      );
+      return res.status(200).json({ success: true, updatedOrder });
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+
+  async updateShippingStatus(req: Request, res: Response): Promise<Response> {
+    try {
+      const orderId = new mongoose.Types.ObjectId(req.params.orderId);
+      const { shipping } = req.body.data;
+      const updatedOrder = await this.updateShippingStatusUseCase.execute(
+        orderId,
+        shipping
       );
       return res.status(200).json({ success: true, updatedOrder });
     } catch (error) {

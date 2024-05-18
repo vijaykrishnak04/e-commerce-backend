@@ -16,6 +16,7 @@ import {
 import { VerifyPaymentUseCase } from "../use_cases/order/VerifyPayment";
 import { CouponRepository } from "../repositories/CouponRepository";
 import { CartRepository } from "../repositories/CartRepository";
+import { UpdateShippingStatus } from "../use_cases/order/UpdateShipping";
 
 const orderRepository = new OrderRepository();
 const orderController = new OrderController(
@@ -29,7 +30,8 @@ const orderController = new OrderController(
   new CancelOrderUseCase(orderRepository),
   new ReturnOrderUseCase(orderRepository),
   new GetOrderDetailsUseCase(orderRepository),
-  new ListOrdersByUserUseCase(orderRepository)
+  new ListOrdersByUserUseCase(orderRepository),
+  new UpdateShippingStatus(orderRepository),
 );
 
 const router = Router();
@@ -51,14 +53,7 @@ router.post(
   }
 );
 
-// Route for updating an order's status
-router.patch(
-  "/status/:orderId",
-  authenticateUser,
-  (req: Request, res: Response) => {
-    orderController.updateOrderStatus(req, res);
-  }
-);
+
 
 // Route for cancelling an order
 router.patch(
@@ -66,15 +61,6 @@ router.patch(
   authenticateUser,
   (req: Request, res: Response) => {
     orderController.cancelOrder(req, res);
-  }
-);
-
-// Route for returning an order
-router.patch(
-  "/return/:orderId",
-  authenticateUser,
-  (req: Request, res: Response) => {
-    orderController.returnOrder(req, res);
   }
 );
 
@@ -92,6 +78,37 @@ router.get("/user/:userId", authenticateUser, (req: Request, res: Response) => {
 router.get("/", authenticateAdmin, (req: Request, res: Response) => {
   orderController.getAllOrders(req, res);
 });
+
+router.get("/:orderId", authenticateAdmin, (req: Request, res: Response) => {
+  orderController.getOrderDetails(req, res);
+});
+
+// Route for returning an order
+router.patch(
+  "/return/:orderId",
+  authenticateUser,
+  (req: Request, res: Response) => {
+    orderController.returnOrder(req, res);
+  }
+);
+
+// Route for updating an order's status
+router.patch(
+  "/update-status/:orderId",
+  authenticateUser,
+  (req: Request, res: Response) => {
+    orderController.updateOrderStatus(req, res);
+  }
+);
+
+// Route for updating an order's status
+router.patch(
+  "/update-shipping/:orderId",
+  authenticateUser,
+  (req: Request, res: Response) => {
+    orderController.updateShippingStatus(req, res);
+  }
+);
 
 // At the very end of your orderRoutes.ts, after all other route definitions
 router.all("/*", (req, res) => {
