@@ -18,4 +18,15 @@ export class AdminController {
       return res.status(400).json({ message: error.message });
     }
   }
+
+  
+  async getDashboardData(req: Request, res: Response): Promise<Response> {
+    try {
+      const data = "dashboard data"
+      return res.status(200).json(data);
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
+  }
+  
 }

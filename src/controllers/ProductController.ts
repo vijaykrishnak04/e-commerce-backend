@@ -24,7 +24,7 @@ export class ProductController {
 
       const addedProduct = await this.addProductUseCase.execute(productData);
       console.log(addedProduct);
-      return res.status(200).json({ addedProduct, success: true });
+      return res.status(200).json(addedProduct);
     } catch (error) {
       console.log(error);
 
