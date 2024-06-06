@@ -21,12 +21,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const corsOptions = {
-  origin: [
-    "http://192.168.29.116:5173", // Add your allowed URL here
-    "http://localhost:5173",
-    "https://bq4r49z7-5173.inc1.devtunnels.ms",
-    "https://eastbrand.netlify.app"
-  ],
+  origin: [process.env.ALLOWED_ORIGINS],
 };
 
 app.use(cors(corsOptions));
