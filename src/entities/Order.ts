@@ -40,12 +40,11 @@ export interface IOrder extends Document {
   items: IOrderItem[];
   address: {
     fullname: string;
+    buildingNo: string;
     street: string;
-    landmark?: string;
+    zone: string;
     city: string;
-    district: string;
     state: string;
-    pinCode: string;
     phone: number;
   };
   orderStatus: "Pending" | "Placed" | "Shipped" | "Delivered" | "Cancelled";
@@ -108,13 +107,12 @@ const orderItemSchema: mongoose.Schema<IOrderItem> = new mongoose.Schema(
 
 const AddressSchema: Schema = new Schema(
   {
-    fullname: { type: String, required: true },
+    fullname: { type: String, requierd: true },
+    buildingNo: { type: String, required: true },
     street: { type: String, required: true },
-    landmark: { type: String },
+    zone: { type: String, required: true },
     city: { type: String, required: true },
-    district: { type: String, required: true },
     state: { type: String, required: true },
-    pinCode: { type: String, required: true },
     phone: { type: Number, required: true },
   },
   { _id: false }
