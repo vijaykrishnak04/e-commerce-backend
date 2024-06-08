@@ -39,6 +39,10 @@ app.use("/api/v1/wishlist", wishlistRoutes);
 app.use("/api/v1/coupon", couponRoutes);
 app.use("/api/v1/order", orderRoutes);
 
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
 app.use("*", (req, res) => {
   res.status(404).json({ message: "Not Found" });
 });
