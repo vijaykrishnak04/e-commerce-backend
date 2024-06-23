@@ -15,17 +15,17 @@ export class EditProductUseCase {
     );
 
     console.log("productId:", productId);
-    console.log("productExist._id:", productExist._id);
+    console.log("productExist._id:", productExist?._id);
     console.log(
       "Is productId equal to productExist._id?",
-      productId.equals(productExist._id)
+      productId.equals(productExist?._id)
     );
 
     if (
-      productExist.productName === productData.productName &&
-      !productId.equals(productExist._id)
+      productExist?.productName === productData?.productName &&
+      !productId.equals(productExist?._id)
     ) {
-      if (productData.files) {
+      if (productData?.files) {
         let deletingFiles = [];
         for (const { filename } of productData.files) {
           deletingFiles.push(filename);
@@ -48,27 +48,27 @@ export class EditProductUseCase {
 
     // Use the safelyParseJSON function for parsing
     const parsedSpecifications =
-      typeof productData.specifications === "string"
-        ? safelyParseJSON(productData.specifications)
-        : productData.specifications;
+      typeof productData?.specifications === "string"
+        ? safelyParseJSON(productData?.specifications)
+        : productData?.specifications;
 
     const parsedColors =
       typeof productData?.color === "string"
         ? safelyParseJSON(productData?.color)
         : productData?.color;
 
-    const parsedSubcategory = productData.subcategory.split(",");
-    const parsedSize = productData?.size && productData.size.split(",");
+    const parsedSubcategory = productData?.subcategory.split(",");
+    const parsedSize = productData?.size && productData?.size.split(",");
 
-    const numericProductPrice = parseFloat(productData.productPrice);
-    const numericStock = parseInt(productData.stock, 10);
+    const numericProductPrice = parseFloat(productData?.productPrice);
+    const numericStock = parseInt(productData?.stock, 10);
 
     // Handle potential undefined `files`
 
     let deletingFiles: any[] = [];
 
     const updatedImages = productData?.files
-      ? productExist.images.flatMap((image, index) => {
+      ? productExist?.images.flatMap((image, index) => {
           return productData.files.map(
             (file: {
               path: string;
@@ -76,7 +76,7 @@ export class EditProductUseCase {
               originalname: string;
             }) => {
               if (file.originalname === `productImage${index + 1}`) {
-                deletingFiles.push(image.publicId);
+                deletingFiles.push(image?.publicId);
                 return {
                   url: file.path,
                   publicId: file.filename,
@@ -87,7 +87,7 @@ export class EditProductUseCase {
             }
           );
         })
-      : productExist.images;
+      : productExist?.images;
 
     deleteFiles(deletingFiles);
 
@@ -102,7 +102,7 @@ export class EditProductUseCase {
       images: updatedImages,
     };
 
-    console.log(newProductData.images);
+    console.log(newProductData?.images);
     return await this.productRepository.updateById(productId, newProductData);
   }
 }

@@ -22,7 +22,7 @@ export interface IProduct extends Document {
   brand: string;
   colors: string[];
   category: string;
-  subcategory: string[];
+  subcategory?: string[];
   deliveryTime: "In Stock" | "Arranging Stock" | "Out Of Stock";
   size?: string[];
   sizeType?: string;
@@ -64,8 +64,7 @@ const productSchema: Schema<IProduct> = new Schema({
   },
   subcategory: [
     {
-      type: String,
-      required: true,
+      type: String
     },
   ],
   deliveryTime: {
