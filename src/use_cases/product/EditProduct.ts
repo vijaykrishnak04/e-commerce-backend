@@ -63,22 +63,26 @@ export class EditProductUseCase {
     const numericProductPrice = parseFloat(productData?.productPrice);
     const numericStock = parseInt(productData?.stock, 10);
 
-    const MAX_IMAGES = 4;  // Define the maximum number of product images
+    const MAX_IMAGES = 4; // Define the maximum number of product images
+    let newImages;
     let deletingFiles = []; // Store files to be deleted from Cloudinary
-    const newImages = new Array(MAX_IMAGES).fill(null);
+    if (productData?.files.length > 0) {
+      newImages = new Array(MAX_IMAGES).fill(null);
+      // Fill newImages with existing data or replace with new data where available
+      for (let i = 0; i < MAX_IMAGES; i++) {
+        const existingImage = productExist?.images[i];
+        const newFile = productData.files.find(
+          (file: any) => file.originalname === `productImage${i + 1}`
+        );
 
-    // Fill newImages with existing data or replace with new data where available
-    for (let i = 0; i < MAX_IMAGES; i++) {
-      const existingImage = productExist.images[i];
-      const newFile = productData.files.find((file:any) => file.originalname === `productImage${i + 1}`);
-      
-      if (newFile) {
-        if (existingImage) {
-          deletingFiles.push(existingImage.publicId);  // Schedule old image for deletion
+        if (newFile) {
+          if (existingImage) {
+            deletingFiles.push(existingImage.publicId); // Schedule old image for deletion
+          }
+          newImages[i] = { url: newFile.path, publicId: newFile.filename }; // Use new image data
+        } else if (existingImage) {
+          newImages[i] = existingImage; // Retain existing image
         }
-        newImages[i] = { url: newFile.path, publicId: newFile.filename };  // Use new image data
-      } else if (existingImage) {
-        newImages[i] = existingImage;  // Retain existing image
       }
     }
 
@@ -92,7 +96,7 @@ export class EditProductUseCase {
       subcategory: parsedSubcategory,
       colors: parsedColors,
       size: parsedSize,
-      images: newImages.filter(image => image !== null),
+      images: productData?.files.length > 0 ? newImages.filter((image) => image !== null) : productExist?.images,
     };
     console.log(newImages);
     console.log(newProductData?.images);
