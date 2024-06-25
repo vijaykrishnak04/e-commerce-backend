@@ -63,31 +63,24 @@ export class EditProductUseCase {
     const numericProductPrice = parseFloat(productData?.productPrice);
     const numericStock = parseInt(productData?.stock, 10);
 
-    // Handle potential undefined `files`
+    const MAX_IMAGES = 4;  // Define the maximum number of product images
+    let deletingFiles = []; // Store files to be deleted from Cloudinary
+    const newImages = new Array(MAX_IMAGES).fill(null);
 
-    let deletingFiles: any[] = [];
-
-    const updatedImages = productData?.files
-      ? productExist?.images.flatMap((image, index) => {
-          return productData.files.map(
-            (file: {
-              path: string;
-              filename: string;
-              originalname: string;
-            }) => {
-              if (file.originalname === `productImage${index + 1}`) {
-                deletingFiles.push(image?.publicId);
-                return {
-                  url: file.path,
-                  publicId: file.filename,
-                };
-              } else {
-                return image; // If no update, return the original image
-              }
-            }
-          );
-        })
-      : productExist?.images;
+    // Fill newImages with existing data or replace with new data where available
+    for (let i = 0; i < MAX_IMAGES; i++) {
+      const existingImage = productExist.images[i];
+      const newFile = productData.files.find((file:any) => file.originalname === `productImage${i + 1}`);
+      
+      if (newFile) {
+        if (existingImage) {
+          deletingFiles.push(existingImage.publicId);  // Schedule old image for deletion
+        }
+        newImages[i] = { url: newFile.path, publicId: newFile.filename };  // Use new image data
+      } else if (existingImage) {
+        newImages[i] = existingImage;  // Retain existing image
+      }
+    }
 
     deleteFiles(deletingFiles);
 
@@ -99,9 +92,9 @@ export class EditProductUseCase {
       subcategory: parsedSubcategory,
       colors: parsedColors,
       size: parsedSize,
-      images: updatedImages,
+      images: newImages.filter(image => image !== null),
     };
-
+    console.log(newImages);
     console.log(newProductData?.images);
     return await this.productRepository.updateById(productId, newProductData);
   }
