@@ -58,7 +58,7 @@ export class EditProductUseCase {
         : productData?.color;
 
     const parsedSubcategory = productData?.subcategory.split(",");
-    const parsedSize = productData?.size && productData?.size.split(",");
+    const parsedSize = productData?.size ? productData?.size.split(",") : [];
 
     const numericProductPrice = parseFloat(productData?.productPrice);
     const numericStock = parseInt(productData?.stock, 10);
@@ -96,10 +96,11 @@ export class EditProductUseCase {
       subcategory: parsedSubcategory,
       colors: parsedColors,
       size: parsedSize,
+      sizeType: productData?.size ? productData?.sizeType : null,
       images: productData?.files.length > 0 ? newImages.filter((image) => image !== null) : productExist?.images,
     };
-    console.log(newImages);
-    console.log(newProductData?.images);
+    
+    // Update the product in the database
     return await this.productRepository.updateById(productId, newProductData);
   }
 }
