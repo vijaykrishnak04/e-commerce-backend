@@ -31,73 +31,76 @@ export interface IProduct extends Document {
 }
 
 // Define the schema for Product, incorporating the interfaces
-const productSchema: Schema<IProduct> = new Schema({
-  productName: {
-    type: String,
-    required: true,
-  },
-  productPrice: {
-    type: Number,
-    required: true,
-  },
-  stock: {
-    type: Number,
-    required: true,
-  },
-  productDescription: {
-    type: String,
-    required: true,
-  },
-  brand: {
-    type: String,
-    required: true,
-  },
-  colors: [
-    {
+const productSchema: Schema<IProduct> = new Schema(
+  {
+    productName: {
       type: String,
       required: true,
     },
-  ],
-  category: {
-    type: String,
-    required: true,
-  },
-  subcategory: [
-    {
-      type: String
+    productPrice: {
+      type: Number,
+      required: true,
     },
-  ],
-  deliveryTime: {
-    type: String,
-    enum: ["In Stock", "Arranging Stock", "Out Of Stock"],
-    default: "In Stock",
-    required: true,
-  },
-  size: [
-    {
+    stock: {
+      type: Number,
+      required: true,
+    },
+    productDescription: {
       type: String,
+      required: true,
     },
-  ],
-  sizeType: { type: String },
-  specifications: [
-    {
-      title: String,
-      description: String,
+    brand: {
+      type: String,
+      required: true,
     },
-  ],
-  images: [
-    {
-      url: {
+    colors: [
+      {
         type: String,
         required: true,
       },
-      publicId: {
-        type: String,
-        required: true,
-      },
+    ],
+    category: {
+      type: String,
+      required: true,
     },
-  ],
-});
+    subcategory: [
+      {
+        type: String,
+      },
+    ],
+    deliveryTime: {
+      type: String,
+      enum: ["In Stock", "Arranging Stock", "Out Of Stock"],
+      default: "In Stock",
+      required: true,
+    },
+    size: [
+      {
+        type: String,
+      },
+    ],
+    sizeType: { type: String },
+    specifications: [
+      {
+        title: String,
+        description: String,
+      },
+    ],
+    images: [
+      {
+        url: {
+          type: String,
+          required: true,
+        },
+        publicId: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+  },
+  { timestamps: true }
+);
 
 // Create a model for Product using the interface and schema defined
 export const Product = mongoose.model<IProduct>("Product", productSchema);

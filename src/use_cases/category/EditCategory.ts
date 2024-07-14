@@ -33,8 +33,6 @@ export class EditCategory {
       const categoryExist = await this.categoryRepository.findByName(
         categoryData.categoryName
       );
-
-      console.log();
       
       if (categoryExist.categoryName === categoryData.categoryName && id.toString() !== categoryExist._id.toString()) {
         if (categoryData?.files) {

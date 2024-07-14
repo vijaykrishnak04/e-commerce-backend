@@ -5,6 +5,7 @@ import { User, IUser } from "../entities/User";
 import bcrypt from "bcryptjs";
 
 export interface IUserRepository {
+  findAll(): Promise<IUser[]>;
   create(userData: IUser): Promise<IUser>;
   findById(userId: mongoose.Types.ObjectId): Promise<IUser>;
   findByEmail(email: string): Promise<IUser | null>;
@@ -20,6 +21,9 @@ export interface IUserRepository {
 }
 
 export class UserRepository implements IUserRepository {
+  async findAll(): Promise<IUser[]> {
+    return User.find().select("-password");
+  }
   async create(userData: IUser): Promise<IUser> {
     const newUser = new User(userData);
     await newUser.save();

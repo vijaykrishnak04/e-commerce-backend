@@ -7,12 +7,14 @@ import { SignUpUseCase } from "../use_cases/user/SignUp";
 import { LoginUseCase } from "../use_cases/user/Login";
 import { signUpValidator, loginValidator } from "../validators/userValidators";
 import { OtpVerify } from "../use_cases/user/OtpVerify";
-import { authenticateUser } from "../middlewares/authenticate";
+import { authenticateUser, authenticateAdmin } from "../middlewares/authenticate";
 import { EditUserDetailsUseCase } from "../use_cases/user/EditUserDetails";
 import { SendOtpUseCases } from "../use_cases/user/SendOtp";
 import { ChangePasswordUseCase } from "../use_cases/user/ChangePassword";
+import { GetAllUsersUseCase } from "../use_cases/user/getAllUsers";
 
 const userController = new UserController(
+  new GetAllUsersUseCase(new UserRepository()),
   new SignUpUseCase(new UserRepository()),
   new LoginUseCase(new UserRepository()),
   new OtpVerify(new UserRepository()),
@@ -22,6 +24,10 @@ const userController = new UserController(
 );
 
 const router = Router();
+
+router.get("/get-all-users", authenticateAdmin, (req: Request, res: Response) =>
+  userController.getAllUsers(req, res)
+);
 
 router.post("/signup", signUpValidator, (req: Request, res: Response) =>
   userController.signUp(req, res)

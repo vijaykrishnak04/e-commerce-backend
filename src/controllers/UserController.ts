@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { GetAllUsersUseCase } from "../use_cases/user/getAllUsers";
 import { SignUpUseCase } from "../use_cases/user/SignUp";
 import { LoginUseCase } from "../use_cases/user/Login";
 import { OtpVerify } from "../use_cases/user/OtpVerify";
@@ -8,6 +9,7 @@ import { SendOtpUseCases } from "../use_cases/user/SendOtp";
 import { ChangePasswordUseCase } from "../use_cases/user/ChangePassword";
 export class UserController {
   constructor(
+    private getAllUsersUseCase: GetAllUsersUseCase,
     private signUpUseCase: SignUpUseCase,
     private loginUseCase: LoginUseCase,
     private otpUseCase: OtpVerify,
@@ -15,6 +17,15 @@ export class UserController {
     private sendOtpUseCase: SendOtpUseCases,
     private changePasswordUseCase: ChangePasswordUseCase
   ) {}
+
+  async getAllUsers(req: Request, res: Response): Promise<Response> {
+    try {
+      const users = await this.getAllUsersUseCase.execute();
+      return res.status(200).json({ users, success: true });
+    } catch (error) {
+      return res.status(400).json({ message: error.message });
+    }
+  }
 
   async signUp(req: Request, res: Response): Promise<Response> {
     const { username, password, email, phone } = req.body;
