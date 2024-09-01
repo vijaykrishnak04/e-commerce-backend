@@ -27,27 +27,22 @@ export class ProductController {
       return res.status(200).json(addedProduct);
     } catch (error) {
       console.log(error);
-
       return res.status(500).json({ message: error.message });
     }
   }
 
   public async editProduct(req: Request, res: Response): Promise<Response> {
     try {
-      console.log(req.params);
+     
       const productId = new mongoose.Types.ObjectId(req.params.productId);
       const productData = {
         ...req.body,
         files: req?.files,
       };
-
-      console.log(productData);
-      
       const addedProduct = await this.editProductUseCase.execute(
         productId,
         productData
       );
-      console.log(addedProduct);
       return res.status(200).json(addedProduct);
     } catch (error) {
       console.log(error);

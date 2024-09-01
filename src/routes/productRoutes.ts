@@ -50,7 +50,7 @@ router.get("/get-all-products", (req: Request, res: Response) => {
 });
 
 router.get("/new-arrival", (req: Request, res: Response) => {
-  productController.getProducts(req, res);
+  productController.getNewArrived(req, res);
 });
 
 router.get("/category/:category", (req: Request, res: Response) => {

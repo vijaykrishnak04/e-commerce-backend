@@ -9,7 +9,6 @@ export class AddProductUseCase {
   constructor(private productRepository: IProductRepository) {}
 
   async execute(productData: any): Promise<IProduct> {
-    console.log(productData);
     const productExist = await this.productRepository.findByName(
       productData.productName
     );
