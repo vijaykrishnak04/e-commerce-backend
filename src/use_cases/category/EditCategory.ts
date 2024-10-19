@@ -31,13 +31,13 @@ export class EditCategory {
       }
 
       const categoryExist = await this.categoryRepository.findByName(
-        categoryData.categoryName
+        categoryData?.categoryName
       );
       
-      if (categoryExist.categoryName === categoryData.categoryName && id.toString() !== categoryExist._id.toString()) {
+      if (categoryExist?.categoryName === categoryData?.categoryName && id.toString() !== categoryExist?._id.toString()) {
         if (categoryData?.files) {
           let deletingFiles = [];
-          for (const { filename } of categoryData.files) {
+          for (const { filename } of categoryData?.files) {
             deletingFiles.push(filename);
           }
           deleteFiles(deletingFiles);
