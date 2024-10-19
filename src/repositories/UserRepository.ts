@@ -59,7 +59,7 @@ export class UserRepository implements IUserRepository {
   }
 
   async update(
-    userId: mongoose.Types.ObjectId,
+    userId: unknown,
     updateData: Partial<IUser>
   ): Promise<IUser> {
     const updatedUser = await User.findByIdAndUpdate(userId, updateData, {

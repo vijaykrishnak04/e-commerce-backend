@@ -3,7 +3,7 @@
 import jwt from "jsonwebtoken";
 
 type TokenPayload = {
-  _id: string;
+  _id: unknown;
   roles: string[];
 };
 

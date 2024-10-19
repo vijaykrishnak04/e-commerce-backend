@@ -5,13 +5,10 @@ import { ICart, Cart } from "../entities/Cart";
 
 export interface ICartRepository {
   create(cartData: Partial<ICart>): Promise<ICart>;
-  findById(cartId: mongoose.Types.ObjectId): Promise<ICart>;
+  findById(cartId: mongoose.Types.ObjectId | unknown): Promise<ICart>;
   deleteById(cartId: mongoose.Types.ObjectId): Promise<boolean>;
   findByUserId(userId: mongoose.Types.ObjectId): Promise<ICart | null>;
-  updateById(
-    cartId: mongoose.Types.ObjectId,
-    updateData: Partial<ICart>
-  ): Promise<ICart>;
+  updateById(cartId: any, updateData: Partial<ICart>): Promise<ICart>;
 }
 
 export class CartRepository implements ICartRepository {
@@ -139,7 +136,7 @@ export class CartRepository implements ICartRepository {
     if (!populatedCart) {
       throw new Error("Failed to create or retrieve cart.");
     }
-    
+
     return populatedCart[0];
   }
 
