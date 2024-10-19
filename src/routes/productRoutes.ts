@@ -53,7 +53,7 @@ router.get("/new-arrival", (req: Request, res: Response) => {
   productController.getNewArrived(req, res);
 });
 
-router.get("/category/:category", (req: Request, res: Response) => {
+router.get("/c", (req: Request, res: Response) => {
   productController.getProductByCategory(req, res);
 });
 

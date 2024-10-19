@@ -4,7 +4,7 @@ interface IShippingDetails {
   provider: string; // Shipping provider (e.g., UPS, FedEx)
   url: string; // Shipping provider (e.g., UPS, FedEx)
   trackingNumber?: string; // Shipping tracking number
-  shippingStatus: "Not Shipped" | "Shipped" | "In Transit" | "Delivered"; // Current status of the shipment
+  shippingStatus: "Not Shipped" | "Shipped" | "In Transit" | "Out for delivery" | "Delivered"; // Current status of the shipment
 }
 interface IOrderItem {
   _id?: mongoose.Types.ObjectId;
@@ -63,7 +63,7 @@ const ShippingDetailsSchema: Schema<IShippingDetails> = new Schema(
     url: { type: String},
     shippingStatus: {
       type: String,
-      enum: ["Not Shipped", "Shipped", "In Transit", "Delivered"],
+      enum: ["Not Shipped", "Shipped", "In Transit","Out for delivery", "Delivered"],
       default: "Not Shipped",
     },
   },

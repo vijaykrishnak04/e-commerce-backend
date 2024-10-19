@@ -8,7 +8,7 @@ const router = Router();
 
 const adminController = new AdminController(
   new LoginUseCase(new AdminRepository()),
-  new DashboardUseCase(new AdminRepository())
+  new DashboardUseCase()
 );
 
 router.post("/login", (req: Request, res: Response) => {

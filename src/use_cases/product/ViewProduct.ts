@@ -39,13 +39,22 @@ export class ViewProductUseCase {
     }
   }
 
-  async getProductsByCategory(category: string): Promise<IProduct[]> {
+  async getProductsByCategory(filters: {}): Promise<{
+    totalProducts: number;
+    products: IProduct[];
+    availableFilters: any;
+    availableSorts: any;
+    currentPage: number;
+    selectedSort: string;
+  }> {
     try {
-      const products = await this.productRepository.findByCategory(category);
-      if (products.length === 0) {
-        throw new Error(`No products found in the category: ${category}.`);
+      const response = await this.productRepository.findByCategory(filters);
+      if (response.products.length === 0) {
+        throw new Error(
+          `No products found in the category: ${JSON.stringify(filters)}.`
+        );
       }
-      return products;
+      return response;
     } catch (error) {
       console.error("Error getting products by category:", error);
       throw new Error("An error occurred while fetching products by category.");

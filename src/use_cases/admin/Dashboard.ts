@@ -7,7 +7,7 @@ import { IAdmin } from "../../entities/Admin";
 import { FilterQuery } from "mongoose";
 
 export class DashboardUseCase {
-  constructor(private adminRepository: IAdminRespository) {}
+  constructor() {}
 
   async execute(filter: any): Promise<any> {
     const query: FilterQuery<IOrder> = {};
@@ -21,7 +21,7 @@ export class DashboardUseCase {
     const totalCategories = await Category.find().countDocuments();
     const totalProducts = await Product.find().countDocuments();
     const totalUsers = await User.find().countDocuments();
-    const totalOrders = await Order.find(query).countDocuments();
+    const totalOrders = await Order.find().countDocuments();
 
     // Calculate last day's increments
     const yesterday = new Date();

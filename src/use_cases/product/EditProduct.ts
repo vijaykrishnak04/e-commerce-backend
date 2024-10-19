@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { IProduct } from "../../entities/Product";
 import { IProductRepository } from "../../repositories/ProductRepository";
 import { deleteFiles } from "../../services/cloudinary";
+import { MAX_IMAGES } from "../../utils/constants";
 
 export class EditProductUseCase {
   constructor(private productRepository: IProductRepository) {}
@@ -12,13 +13,6 @@ export class EditProductUseCase {
   ): Promise<IProduct> {
     const productExist = await this.productRepository.findByName(
       productData.productName
-    );
-
-    console.log("productId:", productId);
-    console.log("productExist._id:", productExist?._id);
-    console.log(
-      "Is productId equal to productExist._id?",
-      productId.equals(productExist?._id)
     );
 
     if (
@@ -63,7 +57,6 @@ export class EditProductUseCase {
     const numericProductPrice = parseFloat(productData?.productPrice);
     const numericStock = parseInt(productData?.stock, 10);
 
-    const MAX_IMAGES = 4; // Define the maximum number of product images
     let newImages;
     let deletingFiles = []; // Store files to be deleted from Cloudinary
     if (productData?.files.length > 0) {
@@ -97,9 +90,12 @@ export class EditProductUseCase {
       colors: parsedColors,
       size: parsedSize,
       sizeType: productData?.size ? productData?.sizeType : null,
-      images: productData?.files.length > 0 ? newImages.filter((image) => image !== null) : productExist?.images,
+      images:
+        productData?.files.length > 0
+          ? newImages.filter((image) => image !== null)
+          : productExist?.images,
     };
-    
+
     // Update the product in the database
     return await this.productRepository.updateById(productId, newProductData);
   }

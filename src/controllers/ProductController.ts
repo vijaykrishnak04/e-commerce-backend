@@ -33,7 +33,6 @@ export class ProductController {
 
   public async editProduct(req: Request, res: Response): Promise<Response> {
     try {
-     
       const productId = new mongoose.Types.ObjectId(req.params.productId);
       const productData = {
         ...req.body,
@@ -74,9 +73,8 @@ export class ProductController {
     res: Response
   ): Promise<Response> {
     try {
-      const { category } = req.params;
       const products = await this.viewProductUseCase.getProductsByCategory(
-        category
+        req.query
       );
       return res.status(200).json(products);
     } catch (error) {
