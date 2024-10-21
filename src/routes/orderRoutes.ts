@@ -53,8 +53,6 @@ router.post(
   }
 );
 
-
-
 // Route for cancelling an order
 router.patch(
   "/cancel/:orderId",
@@ -77,10 +75,6 @@ router.get("/user/:userId", authenticateUser, (req: Request, res: Response) => {
 //admin
 router.get("/", authenticateAdmin, (req: Request, res: Response) => {
   orderController.getAllOrders(req, res);
-});
-
-router.get("/:orderId", authenticateAdmin, (req: Request, res: Response) => {
-  orderController.getOrderDetails(req, res);
 });
 
 // Route for returning an order
